@@ -1,9 +1,12 @@
+// app/layout.tsx
+import "../styles/globals.css";
+import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar";
-import "../styles/globals.css"; // pastikan ada file ini
+import BottomNav from "@/components/BottomNav";
 
-export const metadata = {
-  title: "Pangkas Anugrah",
-  description: "Dashboard pencatatan pelanggan",
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Aplikasi dashboard pribadi",
 };
 
 export default function RootLayout({
@@ -13,11 +16,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 p-6 bg-gray-50">{children}</main>
-        </div>
+      <body className="flex bg-gray-100 min-h-screen">
+        {/* Sidebar hanya tampil di md dan lebih */}
+        <Sidebar />
+
+        {/* Konten utama */}
+        <main className="flex-1 md:ml-4 pb-16 md:pb-0 p-4">{children}</main>
+
+        {/* Bottom Navigation hanya tampil di mobile */}
+        <BottomNav />
       </body>
     </html>
   );

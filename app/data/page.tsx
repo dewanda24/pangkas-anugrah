@@ -68,17 +68,17 @@ export default function DataPage() {
   };
 
   return (
-    <section className="max-w-4xl mx-auto p-4">
-      <h2 className="text-xl font-bold mb-6 text-gray-800 dark:text-gray-700">
+    <section className="max-w-4xl mx-auto px-4 py-6">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
         Data Pengunjung
       </h2>
 
       {/* 🔍 Filter */}
-      <div className="mb-4 flex flex-col md:flex-row gap-3">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:gap-4 gap-3">
         <select
           value={filterJenis}
           onChange={(e) => setFilterJenis(e.target.value.toLowerCase())}
-          className="p-2 rounded border w-full md:w-auto text-gray-700"
+          className="p-2 rounded border border-gray-300 dark:border-gray-600 w-full md:w-auto bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
         >
           <option value="semua">Semua Jenis</option>
           <option value="anak-anak">Anak-anak</option>
@@ -89,7 +89,7 @@ export default function DataPage() {
           type="date"
           value={filterTanggal}
           onChange={(e) => setFilterTanggal(e.target.value)}
-          className="p-2 rounded border w-full md:w-auto text-gray-700"
+          className="p-2 rounded border border-gray-300 dark:border-gray-600 w-full md:w-auto bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
         />
 
         <button
@@ -97,7 +97,7 @@ export default function DataPage() {
             setFilterJenis("semua");
             setFilterTanggal("");
           }}
-          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+          className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded transition"
         >
           Reset
         </button>
@@ -106,7 +106,7 @@ export default function DataPage() {
       {loading ? (
         <p className="text-gray-500 dark:text-gray-400">Memuat data...</p>
       ) : data.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400">Belum ada data.</p>
+        <p className="text-gray-600 dark:text-gray-400">Belum ada data..</p>
       ) : (
         <div className="overflow-x-auto rounded-lg shadow border border-gray-200 dark:border-gray-700">
           <table className="min-w-full text-sm text-gray-800 dark:text-gray-200">
@@ -131,7 +131,7 @@ export default function DataPage() {
                   <td className="px-4 py-3">
                     Rp {item.harga.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 flex gap-2">
+                  <td className="px-4 py-3 flex items-center gap-2">
                     <button
                       onClick={() => {
                         setEditItem(item);
@@ -157,14 +157,15 @@ export default function DataPage() {
 
           {/* 🛠 Modal Edit */}
           {showModal && editItem && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-[90%] max-w-md">
-                <h2 className="text-lg font-semibold mb-4">Edit Data</h2>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-md">
+                <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                  Edit Data
+                </h2>
 
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
-
                     const form = e.target as HTMLFormElement;
                     const tanggal = form.tanggal.value;
                     const jam = form.jam.value;
@@ -182,7 +183,7 @@ export default function DataPage() {
                     } else {
                       alert("Berhasil update");
                       setShowModal(false);
-                      fetchData(); // Refresh data
+                      fetchData();
                     }
                   }}
                 >
@@ -190,20 +191,20 @@ export default function DataPage() {
                     name="tanggal"
                     type="date"
                     defaultValue={editItem.tanggal}
-                    className="w-full mb-3 p-2 rounded border"
+                    className="w-full mb-3 p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
                     required
                   />
                   <input
                     name="jam"
                     type="time"
                     defaultValue={editItem.jam}
-                    className="w-full mb-3 p-2 rounded border"
+                    className="w-full mb-3 p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
                     required
                   />
                   <select
                     name="jenis"
                     defaultValue={editItem.jenis}
-                    className="w-full mb-4 p-2 rounded border"
+                    className="w-full mb-4 p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
                     required
                   >
                     <option value="anak-anak">Anak-anak</option>
@@ -214,13 +215,13 @@ export default function DataPage() {
                     <button
                       type="button"
                       onClick={() => setShowModal(false)}
-                      className="px-4 py-2 bg-gray-400 rounded text-white"
+                      className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded"
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 rounded text-white"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
                     >
                       Simpan
                     </button>

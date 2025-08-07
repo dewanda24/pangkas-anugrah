@@ -47,47 +47,56 @@ export default function Dashboard() {
   }, [startDate, endDate]);
 
   return (
-    <section className="p-4 max-w-5xl mx-auto">
+    <section className="p-4 md:pl-6 lg:pl-8 pr-4 max-w-full">
       {/* Filter Tanggal */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-800 dark:text-gray-700">
+      <div className="flex flex-row flex-wrap gap-4 mb-8">
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <label className="block text-sm font-medium text-gray-800 dark:text-gray-300">
             Dari Tanggal
           </label>
           <input
             type="date"
             value={startDate.toISOString().split("T")[0]}
             onChange={(e) => setStartDate(new Date(e.target.value))}
-            className="border rounded px-3 py-2 text-gray-900"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-800 dark:text-gray-700">
+
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <label className="block text-sm font-medium text-gray-800 dark:text-gray-300">
             Sampai Tanggal
           </label>
           <input
             type="date"
             value={endDate.toISOString().split("T")[0]}
             onChange={(e) => setEndDate(new Date(e.target.value))}
-            className="border rounded px-3 py-2 text-gray-900"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
         </div>
       </div>
 
       {/* Kartu Statistik */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <CardStat
           title="Total Pengunjung"
           value={totalPengunjung}
-          icon={<FiUsers />}
+          icon={<FiUsers className="text-blue-600 dark:text-blue-400" />}
         />
         <CardStat
           title="Total Pendapatan"
           value={`Rp ${totalPendapatan.toLocaleString()}`}
-          icon={<FiDollarSign />}
+          icon={<FiDollarSign className="text-green-600 dark:text-green-400" />}
         />
-        <CardStat title="Anak-anak" value={jumlahAnak} icon={<FaChild />} />
-        <CardStat title="Dewasa" value={jumlahDewasa} icon={<FaUserTie />} />
+        <CardStat
+          title="Anak-anak"
+          value={jumlahAnak}
+          icon={<FaChild className="text-yellow-600 dark:text-yellow-400" />}
+        />
+        <CardStat
+          title="Dewasa"
+          value={jumlahDewasa}
+          icon={<FaUserTie className="text-purple-600 dark:text-purple-400" />}
+        />
       </div>
     </section>
   );
