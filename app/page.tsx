@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import CardStat from "@/components/CardStat";
 import { FiUsers, FiDollarSign } from "react-icons/fi";
 import { FaChild, FaUserTie } from "react-icons/fa";
+import "../styles/globals.css";
 
 export default function Dashboard() {
   const [totalPengunjung, setTotalPengunjung] = useState(0);
