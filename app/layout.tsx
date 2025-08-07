@@ -1,30 +1,41 @@
-// app/layout.tsx
-import "../styles/globals.css";
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Aplikasi dashboard pribadi",
-};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const [showLayout, setShowLayout] = useState(false);
+
+  useEffect(() => {
+    // Hanya tampilkan Sidebar & BottomNav di luar halaman login
+    setShowLayout(!pathname.startsWith("/auth/login"));
+  }, [pathname]);
+
   return (
     <html lang="en">
-      <body className="flex bg-gray-100 min-h-screen">
-        {/* Sidebar hanya tampil di md dan lebih */}
-        <Sidebar />
+      <body className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        {showLayout ? (
+          <div className="flex min-h-screen">
+            {/* Sidebar di kiri */}
+            <Sidebar />
 
-        {/* Konten utama */}
-        <main className="flex-1 md:ml-4 pb-16 md:pb-0 p-4">{children}</main>
-
-        {/* Bottom Navigation hanya tampil di mobile */}
-        <BottomNav />
+            {/* Konten utama */}
+            <div className="flex-1 flex flex-col">
+              <main className="flex-1 p-4 overflow-y-auto">{children}</main>
+              <BottomNav />
+            </div>
+          </div>
+        ) : (
+          // Kalau halaman login, tampilkan langsung konten
+          <div>{children}</div>
+        )}
       </body>
     </html>
   );

@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [totalPendapatan, setTotalPendapatan] = useState(0);
   const [jumlahAnak, setJumlahAnak] = useState(0);
   const [jumlahDewasa, setJumlahDewasa] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -20,6 +21,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
+      setLoading(true);
+
       const { data, error } = await supabase
         .from("pengunjung")
         .select("harga, jenis, tanggal")
@@ -28,19 +31,25 @@ export default function Dashboard() {
 
       if (error) {
         console.error("Gagal fetch:", error.message);
+        setLoading(false);
         return;
       }
 
-      const jumlah = data?.length || 0;
-      const total =
-        data?.reduce((acc, curr) => acc + (curr.harga || 0), 0) || 0;
-      const anak = data?.filter((d) => d.jenis === "Anak-anak").length || 0;
-      const dewasa = data?.filter((d) => d.jenis === "Dewasa").length || 0;
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
+      const jumlah = data.length;
+      const total = data.reduce((acc, curr) => acc + (curr.harga || 0), 0);
+      const anak = data.filter((d) => d.jenis === "Anak-anak").length;
+      const dewasa = data.filter((d) => d.jenis === "Dewasa").length;
 
       setTotalPengunjung(jumlah);
       setTotalPendapatan(total);
       setJumlahAnak(anak);
       setJumlahDewasa(dewasa);
+      setLoading(false);
     };
 
     fetchStats();
@@ -79,22 +88,24 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <CardStat
           title="Total Pengunjung"
-          value={totalPengunjung}
+          value={loading ? "Loading..." : totalPengunjung}
           icon={<FiUsers className="text-blue-600 dark:text-blue-400" />}
         />
         <CardStat
           title="Total Pendapatan"
-          value={`Rp ${totalPendapatan.toLocaleString()}`}
+          value={
+            loading ? "Loading..." : `Rp ${totalPendapatan.toLocaleString()}`
+          }
           icon={<FiDollarSign className="text-green-600 dark:text-green-400" />}
         />
         <CardStat
           title="Anak-anak"
-          value={jumlahAnak}
+          value={loading ? "..." : jumlahAnak}
           icon={<FaChild className="text-yellow-600 dark:text-yellow-400" />}
         />
         <CardStat
           title="Dewasa"
-          value={jumlahDewasa}
+          value={loading ? "..." : jumlahDewasa}
           icon={<FaUserTie className="text-purple-600 dark:text-purple-400" />}
         />
       </div>
