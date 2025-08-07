@@ -25,7 +25,7 @@ export default function InputPage() {
     // Set harga otomatis berdasarkan jenis
     if (name === "jenis") {
       const harga =
-        value === "anak-anak" ? "18000" : value === "dewasa" ? "20000" : "";
+        value === "Anak-anak" ? "18000" : value === "Dewasa" ? "20000" : "";
       setForm({ ...form, jenis: value, harga });
     } else {
       setForm({ ...form, [name]: value });
