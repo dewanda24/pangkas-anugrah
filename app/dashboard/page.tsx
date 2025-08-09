@@ -10,37 +10,50 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 
-function getDateRange(filter: "hari" | "bulan" | "tahun") {
+type FilterType = "hari" | "bulan" | "tahun" | "custom";
+
+function getDateRange(
+  filter: FilterType,
+  customStart?: string,
+  customEnd?: string
+) {
   const today = new Date();
 
-  let startDate = "";
-  let endDate = "";
-
   if (filter === "hari") {
-    startDate = today.toISOString().slice(0, 10);
-    endDate = startDate;
+    const startDate = today.toISOString().slice(0, 10); // format YYYY-MM-DD
+    return { startDate, endDate: startDate };
   } else if (filter === "bulan") {
-    startDate = today.toISOString().slice(0, 7) + "-01";
+    const startDate = today.toISOString().slice(0, 7) + "-01";
     const endDay = new Date(
       today.getFullYear(),
       today.getMonth() + 1,
       0
     ).getDate();
-    endDate = `${today.getFullYear()}-${(today.getMonth() + 1)
+    const endDate = `${today.getFullYear()}-${(today.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${endDay.toString().padStart(2, "0")}`;
+    return { startDate, endDate };
   } else if (filter === "tahun") {
-    startDate = `${today.getFullYear()}-01-01`;
-    endDate = `${today.getFullYear()}-12-31`;
+    const startDate = `${today.getFullYear()}-01-01`;
+    const endDate = `${today.getFullYear()}-12-31`;
+    return { startDate, endDate };
+  } else if (filter === "custom" && customStart && customEnd) {
+    return { startDate: customStart, endDate: customEnd };
   }
 
-  return { startDate, endDate };
+  // fallback hari ini
+  const startDate = today.toISOString().slice(0, 10);
+  return { startDate, endDate: startDate };
 }
 
 export default function DashboardPage() {
   const supabase = createClientComponentClient();
 
-  const [filter, setFilter] = useState<"hari" | "bulan" | "tahun">("hari");
+  const [filter, setFilter] = useState<FilterType>("hari");
+
+  // Untuk input tanggal custom
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
 
   const [visitors, setVisitors] = useState<number>(0);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
@@ -55,20 +68,25 @@ export default function DashboardPage() {
       setLoading(true);
       setError("");
 
-      const { startDate, endDate } = getDateRange(filter);
+      // Tentukan tanggal sesuai filter
+      const { startDate, endDate } = getDateRange(
+        filter,
+        customStartDate,
+        customEndDate
+      );
 
       try {
         // Pengunjung (total count)
-        const { data: visitorsData, error: visitorsError } = await supabase
+        const { count: visitorsCount, error: visitorsError } = await supabase
           .from("pelanggan")
-          .select("id", { count: "exact" })
+          .select("id", { count: "exact", head: true })
           .gte("tanggal", startDate)
           .lte("tanggal", endDate);
 
         if (visitorsError) throw visitorsError;
-        setVisitors(visitorsData?.length || 0);
+        setVisitors(visitorsCount ?? 0);
 
-        // Total pendapatan
+        // Total pendapatan (sum harga)
         const { data: revenueData, error: revenueError } = await supabase
           .from("pelanggan")
           .select("harga")
@@ -76,6 +94,7 @@ export default function DashboardPage() {
           .lte("tanggal", endDate);
 
         if (revenueError) throw revenueError;
+
         const revenueTotal = revenueData?.reduce(
           (sum, item) => sum + (item.harga || 0),
           0
@@ -83,26 +102,26 @@ export default function DashboardPage() {
         setTotalRevenue(revenueTotal || 0);
 
         // Jumlah anak
-        const { data: childrenData, error: childrenError } = await supabase
+        const { count: childrenCount, error: childrenError } = await supabase
           .from("pelanggan")
-          .select("id", { count: "exact" })
+          .select("id", { count: "exact", head: true })
           .eq("jenis", "Anak-anak")
           .gte("tanggal", startDate)
           .lte("tanggal", endDate);
 
         if (childrenError) throw childrenError;
-        setChildrenCount(childrenData?.length || 0);
+        setChildrenCount(childrenCount ?? 0);
 
         // Jumlah dewasa
-        const { data: adultData, error: adultError } = await supabase
+        const { count: adultCount, error: adultError } = await supabase
           .from("pelanggan")
-          .select("id", { count: "exact" })
+          .select("id", { count: "exact", head: true })
           .eq("jenis", "Dewasa")
           .gte("tanggal", startDate)
           .lte("tanggal", endDate);
 
         if (adultError) throw adultError;
-        setAdultCount(adultData?.length || 0);
+        setAdultCount(adultCount ?? 0);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Gagal mengambil data";
@@ -112,8 +131,22 @@ export default function DashboardPage() {
       }
     };
 
-    fetchDashboardData();
-  }, [filter, supabase]);
+    // Jika filter custom, pastikan tanggal mulai & akhir valid dulu sebelum fetch
+    if (filter === "custom") {
+      if (customStartDate && customEndDate) {
+        fetchDashboardData();
+      } else {
+        // Kalau tanggal belum lengkap, reset data ke 0
+        setVisitors(0);
+        setTotalRevenue(0);
+        setChildrenCount(0);
+        setAdultCount(0);
+        setLoading(false);
+      }
+    } else {
+      fetchDashboardData();
+    }
+  }, [filter, customStartDate, customEndDate, supabase]);
 
   if (loading) return <p>Memuat data dashboard...</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -121,23 +154,52 @@ export default function DashboardPage() {
   return (
     <div className="p-4">
       {/* Filter */}
-      <div className="mb-6 flex items-center gap-4">
-        <FaCalendarAlt className="text-gray-600 text-xl" />
-        <label htmlFor="filter" className="font-semibold">
-          Filter Data:
-        </label>
-        <select
-          id="filter"
-          value={filter}
-          onChange={(e) =>
-            setFilter(e.target.value as "hari" | "bulan" | "tahun")
-          }
-          className="border border-gray-300 rounded px-2 py-1"
-        >
-          <option value="hari">Hari Ini</option>
-          <option value="bulan">Bulan Ini</option>
-          <option value="tahun">Tahun Ini</option>
-        </select>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 ">
+        <div className="flex items-center gap-2">
+          <FaCalendarAlt className="text-gray-600 text-xl" />
+          <label htmlFor="filter" className="font-semibold">
+            Filter Data:
+          </label>
+          <select
+            id="filter"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as FilterType)}
+            className="border border-gray-300 rounded px-2 py-1 bg-gray-900"
+          >
+            <option value="hari">Hari Ini</option>
+            <option value="bulan">Bulan Ini</option>
+            <option value="tahun">Tahun Ini</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+
+        {filter === "custom" && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="startDate" className="font-semibold">
+              Dari:
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1"
+              max={customEndDate || undefined}
+            />
+
+            <label htmlFor="endDate" className="font-semibold">
+              Sampai:
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1"
+              min={customStartDate || undefined}
+            />
+          </div>
+        )}
       </div>
 
       {/* Cards */}
@@ -150,7 +212,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="card bg-white dark:bg-gray-900  p-4 rounded shadow flex items-center gap-4">
+        <div className="card bg-white dark:bg-gray-900 p-4 rounded shadow flex items-center gap-4">
           <FaDollarSign className="text-green-600 text-3xl" />
           <div>
             <h3 className="text-lg font-semibold">Pendapatan</h3>
@@ -158,7 +220,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="card bg-white dark:bg-gray-900  p-4 rounded shadow flex items-center gap-4">
+        <div className="card bg-white dark:bg-gray-900 p-4 rounded shadow flex items-center gap-4">
           <FaChild className="text-yellow-600 text-3xl" />
           <div>
             <h3 className="text-lg font-semibold">Jumlah Anak</h3>
@@ -166,7 +228,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="card bg-white dark:bg-gray-900  p-4 rounded shadow flex items-center gap-4">
+        <div className="card bg-white dark:bg-gray-900 p-4 rounded shadow flex items-center gap-4">
           <FaUsers className="text-purple-600 text-3xl" />
           <div>
             <h3 className="text-lg font-semibold">Jumlah Dewasa</h3>

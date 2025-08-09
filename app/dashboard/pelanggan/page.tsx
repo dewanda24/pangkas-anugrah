@@ -234,21 +234,46 @@ export default function PelangganPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex gap-1 justify-center mt-5">
-          {Array.from({ length: totalPages }, (_, i) => (
+        <div className="overflow-x-auto w-full mt-5 mb-12 md:mb-0">
+          <div className="inline-flex gap-1 justify-center min-w-max px-2 items-center">
+            {/* Prev */}
             <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded font-semibold shadow-md transition duration-300 text-sm ${
-                currentPage === i + 1
-                  ? "bg-indigo-600 text-white"
-                  : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-              }`}
-              aria-label={`Page ${i + 1}`}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded font-semibold shadow-md text-sm bg-gray-50 text-indigo-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Previous Page"
             >
-              {i + 1}
+              Prev
             </button>
-          ))}
+
+            {/* Page numbers */}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded font-semibold shadow-md transition duration-300 text-sm whitespace-nowrap ${
+                  currentPage === i + 1
+                    ? "bg-indigo-600 text-white"
+                    : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                }`}
+                aria-label={`Page ${i + 1}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            {/* Next */}
+            <button
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded font-semibold shadow-md text-sm bg-indigo-100 text-indigo-700 hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Next Page"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

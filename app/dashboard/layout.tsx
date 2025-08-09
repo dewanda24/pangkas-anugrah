@@ -43,12 +43,14 @@ export default function DashboardLayout({
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-950 transition-colors duration-300">
-      {/* Sidebar Desktop */}
-      <aside className="hidden md:flex md:flex-col w-60 bg-gray-200 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800 p-4">
+      <aside
+        className="hidden md:flex md:flex-col w-60 bg-gray-200 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800 p-4
+             fixed top-0 left-0 h-full z-40"
+      >
         <h2 className="text-lg font-semibold mb-6 text-gray-900 dark:text-gray-100">
           Pangkas Anugrah
         </h2>
-        <nav className="flex flex-col gap-2 flex-grow">
+        <nav className="flex flex-col gap-2 flex-grow overflow-y-auto">
           {menuItems.map((item) => (
             <Link
               key={item.path}
@@ -74,7 +76,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Konten Utama */}
-      <main className="flex-1 p-4">{children}</main>
+      <main className="flex-1 p-4 md:ml-60">{children}</main>
 
       {/* Bottom Navbar Mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-200 dark:bg-gray-900 border-t border-gray-300 dark:border-gray-800 flex justify-around py-2">
