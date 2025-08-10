@@ -164,7 +164,7 @@ export default function DashboardPage() {
             id="filter"
             value={filter}
             onChange={(e) => setFilter(e.target.value as FilterType)}
-            className="border border-gray-300 rounded px-2 py-1 bg-gray-900"
+            className="border border-gray-300 rounded px-2 py-1 dark:bg-gray-900"
           >
             <option value="hari">Hari Ini</option>
             <option value="bulan">Bulan Ini</option>
